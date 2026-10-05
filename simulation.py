@@ -14,6 +14,8 @@ class Simulation:
 
         self.events = []
 
+        self.processed_messages = set()
+
 
     def add_event(self, event):
 
@@ -71,11 +73,22 @@ class Simulation:
         return self.move_message(message, next_node)
 
     def deliver_message(self, message):
+        if message.message_id in self.processed_messages:
+            self.add_event(
+                f"Duplicate message {message.message_id} ignored."
+            )
+            return False
+
         message.mark_delivered()
+
+        self.processed_messages.add(message.message_id)
+
         self.add_event(
             f"Message {message.message_id} delivered to "
             f"{message.destination}."
         )
+
+        return True
 
 
 if __name__ == "__main__":
@@ -179,3 +192,7 @@ if __name__ == "__main__":
 
     for event in simulation.events:
         print("-", event)
+
+    print("\nTesting duplicate message...")
+
+    simulation.deliver_message(message)    
