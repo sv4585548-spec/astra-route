@@ -64,6 +64,12 @@ class Simulation:
             f"Message {message.message_id} was buffered."
         )
 
+    def retry_message(self, message, next_node):                                                                   
+        if message.status != "buffered":
+            return False
+
+        return self.move_message(message, next_node)
+
     def deliver_message(self, message):
         message.mark_delivered()
         self.add_event(
@@ -153,7 +159,7 @@ if __name__ == "__main__":
     )
 
     
-    simulation.move_message(
+    simulation.retry_message(
         message,
         "Relay_B"
     )
