@@ -2,7 +2,7 @@ from network import Network
 
 from messages import Message
 
-
+from integrity import calculate_hash, verify_integrity
 
 class Simulation:
 
@@ -167,6 +167,9 @@ if __name__ == "__main__":
         deadline=60
     )
 
+    message_data = "Emergency data from Earth to Mars"
+    original_hash = calculate_hash(message_data)
+
     simulation.add_event(
         f"Message {message.message_id} created at {message.source}."
     )
@@ -204,7 +207,16 @@ if __name__ == "__main__":
             "Mars"
         )
 
-        simulation.deliver_message(message)
+        received_data = "Emergency data from Earth to Mars"
+        if verify_integrity(original_hash, received_data):
+            simulation.add_event(
+                "Message integrity verified successfully."
+            )
+            simulation.deliver_message(message)
+        else:
+            simulation.add_event(
+                "Message integrity verification failed."
+            )  
 
    
     print("\nFinal message status:")
