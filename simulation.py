@@ -56,10 +56,19 @@ class Simulation:
         ):
             self.buffer_message(message)
 
-            self.add_event(
-                f"Cannot move {message.message_id}: "
-                f"link {current_node} -> {next_node} is unavailable."
-            )
+            if self.network.is_link_congested(
+                current_node,
+                next_node
+            ):
+                self.add_event(
+                    f"Cannot move {message.message_id}: "
+                    f"link {current_node} -> {next_node} is congested."
+                )
+            else:
+                self.add_event(
+                    f"Cannot move {message.message_id}: "
+                    f"link {current_node} -> {next_node} is unavailable."
+                )
 
             return False
 
@@ -166,7 +175,6 @@ if __name__ == "__main__":
     simulation.move_message(message, "Relay_A")
 
     
-  
 
     simulation.move_message(
         message,
@@ -184,6 +192,7 @@ if __name__ == "__main__":
 
     simulation.advance_time(10)
 
+    
 
     if simulation.retry_message(
         message,

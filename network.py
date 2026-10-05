@@ -23,6 +23,7 @@ class Link:
         self.delay = delay
         self.reliability = reliability
         self.status = "active"
+        self.congested = False
 
         self.contact_start = contact_start
         self.contact_end = contact_end
@@ -30,8 +31,15 @@ class Link:
     def fail(self):
         self.status = "failed"
 
+
     def restore(self):
         self.status = "active"
+
+    def congest(self):
+        self.congested = True
+
+    def clear_congestion(self):
+        self.congested = False    
 
     def __repr__(self):
         return (
@@ -86,6 +94,9 @@ class Network:
                 if link.status != "active":
                     return False
 
+                if link.congested:
+                    return False    
+
                 if current_time < link.contact_start:
                     return False
 
@@ -98,6 +109,16 @@ class Network:
                 return True
 
         return False
+
+    def is_link_congested(self, source_name, destination_name):
+        for link in self.links:
+            if (
+                link.source.name == source_name
+                and link.destination.name == destination_name
+            ):
+                return link.congested
+
+        return False    
    
     def fail_link(self, source_name, destination_name):
         for link in self.links:
@@ -120,6 +141,29 @@ class Network:
                 return True
 
         return False
+    
+    def congest_link(self, source_name, destination_name):
+        for link in self.links:
+            if (
+                link.source.name == source_name
+                and link.destination.name == destination_name
+            ):
+                link.congest()
+                return True
+        return False
+
+
+    def clear_link_congestion(self, source_name, destination_name):
+        for link in self.links:
+            if (
+                link.source.name == source_name
+                and link.destination.name == destination_name
+            ):
+                link.clear_congestion()
+                return True
+        return False
+
+
 
 
 if __name__ == "__main__":
