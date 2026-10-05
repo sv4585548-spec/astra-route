@@ -1,26 +1,62 @@
 from network import Network
+
 from messages import Message
 
 
+
 class Simulation:
+
     def __init__(self):
+
         self.network = Network()
+
         self.time = 0
+
         self.events = []
 
+
     def add_event(self, event):
+
         self.events.append(event)
+
         print(f"[TIME {self.time}] {event}")
 
-    def advance_time(self, seconds):
-        self.time += seconds
-        self.add_event(f"Simulation time advanced by {seconds} seconds.")
 
+    def advance_time(self, seconds):
+
+        self.time += seconds
+
+        self.add_event(f"Simulation time advanced by {seconds} seconds.")
+    
     def move_message(self, message, next_node):
+        current_node = message.current_node
+
+        if current_node == next_node:
+            return False
+
+        if not self.network.is_link_active(
+            current_node,
+            next_node
+        ):
+            self.buffer_message(message)
+
+            self.add_event(
+                f"Cannot move {message.message_id}: "
+                f"link {current_node} -> {next_node} is unavailable."
+            )
+
+            return False
+
         message.update_location(next_node)
+
         self.add_event(
-            f"Message {message.message_id} moved to {next_node}."
+            f"Message {message.message_id} moved "
+            f"from {current_node} to {next_node}."
         )
+
+        return True
+     
+    
 
     def buffer_message(self, message):
         message.mark_buffered()
@@ -46,6 +82,7 @@ if __name__ == "__main__":
     relay_b = simulation.network.add_node("Relay_B")
     mars = simulation.network.add_node("Mars")
 
+    
     simulation.network.add_link(
         earth,
         relay_a,
@@ -97,10 +134,12 @@ if __name__ == "__main__":
         "Relay_B"
     )
 
+    simulation.move_message(
+        message,
+        "Relay_B"
+    )
+
     
-    simulation.buffer_message(message)
-
-
     simulation.advance_time(10)
 
     
@@ -114,9 +153,15 @@ if __name__ == "__main__":
     )
 
     
-    simulation.move_message(message, "Relay_B")
+    simulation.move_message(
+        message,
+        "Relay_B"
+    )
 
-    simulation.move_message(message, "Mars")
+    simulation.move_message(
+        message,
+        "Mars"
+    )
 
     
     simulation.deliver_message(message)
