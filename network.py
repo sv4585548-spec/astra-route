@@ -7,13 +7,25 @@ class Node:
 
 
 class Link:
-    def __init__(self, source, destination, bandwidth, delay, reliability):
+    def __init__(
+        self,
+        source,
+        destination,
+        bandwidth,
+        delay,
+        reliability,
+        contact_start=0,
+        contact_end=None
+    ):
         self.source = source
         self.destination = destination
         self.bandwidth = bandwidth
         self.delay = delay
         self.reliability = reliability
         self.status = "active"
+
+        self.contact_start = contact_start
+        self.contact_end = contact_end
 
     def fail(self):
         self.status = "failed"
@@ -38,13 +50,24 @@ class Network:
         self.nodes[name] = node
         return node
 
-    def add_link(self, source, destination, bandwidth, delay, reliability):
+    def add_link(
+        self,
+        source,
+        destination,
+        bandwidth,
+        delay,
+        reliability,
+        contact_start=0,
+        contact_end=None
+    ):
         link = Link(
             source,
             destination,
             bandwidth,
             delay,
-            reliability
+            reliability,
+            contact_start,
+            contact_end
         )
         self.links.append(link)
         return link
@@ -54,17 +77,28 @@ class Network:
             link for link in self.links
             if link.status == "active"
         ]
-    
-    def is_link_active(self, source_name, destination_name):
+    def is_link_active(self, source_name, destination_name, current_time=0):
         for link in self.links:
             if (
                 link.source.name == source_name
                 and link.destination.name == destination_name
             ):
-                return link.status == "active"
+                if link.status != "active":
+                    return False
+
+                if current_time < link.contact_start:
+                    return False
+
+                if (
+                    link.contact_end is not None
+                    and current_time > link.contact_end
+                ):
+                    return False
+
+                return True
 
         return False
-
+   
     def fail_link(self, source_name, destination_name):
         for link in self.links:
             if (
@@ -144,7 +178,7 @@ if __name__ == "__main__":
     for link in network.get_active_links():
         print(link)   
            
-        print("\nChecking link status:")
+    print("\nChecking link status:")
 
     print(
         "Earth -> Relay_A:",

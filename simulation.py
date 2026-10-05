@@ -38,7 +38,8 @@ class Simulation:
 
         if not self.network.is_link_active(
             current_node,
-            next_node
+            next_node,
+            self.time
         ):
             self.buffer_message(message)
 
@@ -115,7 +116,9 @@ if __name__ == "__main__":
         relay_b,
         bandwidth=80,
         delay=10,
-        reliability=0.90
+        reliability=0.90,
+        contact_start=20,
+        contact_end=40
     )
 
     simulation.network.add_link(
@@ -144,47 +147,38 @@ if __name__ == "__main__":
     simulation.move_message(message, "Relay_A")
 
     
-    simulation.add_event(
-        "Relay_A -> Relay_B link has failed!"
-    )
-
-    simulation.network.fail_link(
-        "Relay_A",
-        "Relay_B"
-    )
+  
 
     simulation.move_message(
         message,
         "Relay_B"
     )
 
-    
     simulation.advance_time(10)
 
-    
-    simulation.add_event(
-        "Relay_A -> Relay_B link has been restored!"
-    )
 
-    simulation.network.restore_link(
-        "Relay_A",
-        "Relay_B"
-    )
-
-    
     simulation.retry_message(
         message,
         "Relay_B"
     )
 
-    simulation.move_message(
+
+    simulation.advance_time(10)
+
+
+    if simulation.retry_message(
         message,
-        "Mars"
-    )
+        "Relay_B"
+    ):
 
-    
-    simulation.deliver_message(message)
+        simulation.move_message(
+            message,
+            "Mars"
+        )
 
+        simulation.deliver_message(message)
+
+   
     print("\nFinal message status:")
     print(message)
 
@@ -193,6 +187,4 @@ if __name__ == "__main__":
     for event in simulation.events:
         print("-", event)
 
-    print("\nTesting duplicate message...")
-
-    simulation.deliver_message(message)    
+    
