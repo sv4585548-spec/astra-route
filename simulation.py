@@ -79,6 +79,12 @@ class Simulation:
                 f"Duplicate message {message.message_id} ignored."
             )
             return False
+        if message.current_node != message.destination:
+            self.add_event(
+                f"Cannot deliver {message.message_id}: "
+                f"message has not reached its destination."
+            )
+            return False
 
         message.mark_delivered()
 
