@@ -13,7 +13,7 @@ def find_best_route(network, source, destination):
     best_route = None
     best_score = float("inf")
 
-    # Check all possible simple routes
+    
     for route in nx.all_simple_paths(network, source, destination):
 
         total_score = 0
@@ -28,7 +28,7 @@ def find_best_route(network, source, destination):
             reliability = link.get("reliability", 1)
             bandwidth = link.get("bandwidth", 100)
 
-            # Lower score = better route
+            
             score = (
                 delay
                 + (1 - reliability) * 10
@@ -90,11 +90,21 @@ def create_space_network():
     )
 
     return network
+def reroute_after_failure(network, source, destination):
+    """
+    Find an alternative route after a network link failure.
+    """
+
+    return find_best_route(
+        network,
+        source,
+        destination
+    )
 
 
 if __name__ == "__main__":
+    network =create_space_network()
 
-    network = create_space_network()
 
     route = find_best_route(
         network,
