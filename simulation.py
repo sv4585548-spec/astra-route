@@ -30,10 +30,23 @@ class Simulation:
 
         self.add_event(f"Simulation time advanced by {seconds} seconds.")
     
+    def check_deadline(self, message):
+        if self.time > message.deadline:
+            self.add_event(
+                f"Message {message.message_id} missed its deadline."
+            )
+            return False
+
+        return True
+
+
     def move_message(self, message, next_node):
         current_node = message.current_node
 
         if current_node == next_node:
+            return False
+        
+        if not self.check_deadline(message):
             return False
 
         if not self.network.is_link_active(
