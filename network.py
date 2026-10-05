@@ -124,3 +124,14 @@ if __name__ == "__main__":
 
     for link in network.get_active_links():
         print(link)       
+    
+    print("\nRestoring Relay_A -> Relay_B...")
+
+    network.restore_link("Relay_A", "Relay_B")
+
+    print("\nActive links after restoration:")
+
+    for link in network.get_active_links():
+        print(link)   
+           
+           
