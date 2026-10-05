@@ -54,6 +54,16 @@ class Network:
             link for link in self.links
             if link.status == "active"
         ]
+    
+    def is_link_active(self, source_name, destination_name):
+        for link in self.links:
+            if (
+                link.source.name == source_name
+                and link.destination.name == destination_name
+            ):
+                return link.status == "active"
+
+        return False
 
     def fail_link(self, source_name, destination_name):
         for link in self.links:
@@ -134,4 +144,14 @@ if __name__ == "__main__":
     for link in network.get_active_links():
         print(link)   
            
-           
+        print("\nChecking link status:")
+
+    print(
+        "Earth -> Relay_A:",
+        network.is_link_active("Earth", "Relay_A")
+    )
+
+    print(
+        "Relay_A -> Relay_B:",
+        network.is_link_active("Relay_A", "Relay_B")
+    )       
