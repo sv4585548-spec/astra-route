@@ -4,6 +4,10 @@ from messages import Message
 
 from integrity import calculate_hash, verify_integrity
 
+from network_adapter import convert_to_networkx
+
+from backend.routing import find_best_route
+
 class Simulation:
 
     def __init__(self):
@@ -28,8 +32,55 @@ class Simulation:
 
         self.time += seconds
 
-        self.add_event(f"Simulation time advanced by {seconds} seconds.")
-    
+        self.add_event(
+            f"Simulation time advanced by {seconds} seconds."
+        )
+
+    def find_route(self, source, destination):
+        graph = convert_to_networkx(
+            self.network,
+            self.time
+        )
+
+        return find_best_route(
+            graph,
+            source,
+            destination
+        )
+
+    def get_next_hop(self, message):
+        route = self.find_route(
+            message.current_node,
+            message.destination
+        )
+
+        if route is None:
+            self.buffer_message(message)
+
+            self.add_event(
+                f"No available route for {message.message_id} "
+                f"from {message.current_node} to "
+                f"{message.destination}."
+            )
+
+            return None
+
+        if len(route) < 2:
+            return None
+
+        return route[1]    
+
+    def route_message(self, message):
+        if not self.check_deadline(message):
+            return False
+
+        next_node = self.get_next_hop(message)
+
+        if next_node is None:
+            return False
+
+        return self.move_message(message, next_node)    
+
     def check_deadline(self, message):
         if self.time > message.deadline:
             self.add_event(
